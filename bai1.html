@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Booking System - Chọn Ghế</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+
+    #seat-area {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: repeat(8, 50px);
+      grid-gap: 10px;
+      justify-content: center;
+    }
+
+    .seat {
+      width: 50px;
+      height: 50px;
+      background: #ddd;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      user-select: none;
+    }
+
+    .standard { background: #cde7ff; }
+    .vip { background: #ffe0b2; }
+    .sweetbox { background: #f7cce8; }
+
+    .selected { background: #4caf50 !important; color: white; }
+    .sold { background: gray !important; color: white; cursor: not-allowed; }
+
+    #info {
+      margin-top: 20px;
+      font-size: 18px;
+    }
+
+    #payBtn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 18px;
+    }
+
+  
+    #modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      display: none;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #modal-content {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      width: 300px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Chọn Ghế Rạp Chiếu Phim</h1>
+
+  <div id="seat-area"></div>
+
+  <div id="info">
+    Số ghế đã chọn: <span id="count">0</span><br>
+    Tổng tiền: <span id="total">0</span>đ
+  </div>
+
+  <button id="payBtn">Thanh Toán</button>
+
+ 
+  <div id="modal">
+    <div id="modal-content">
+      <h3>Thông Tin Vé</h3>
+      <p id="summary"></p>
+      <button onclick="closeModal()">Đóng</button>
+    </div>
+  </div>
+
+<script>
+  const seatArea = document.getElementById("seat-area");
+  const countEl = document.getElementById("count");
+  const totalEl = document.getElementById("total");
+
+  const seatPrices = {
+    standard: 50000,
+    vip: 80000,
+    sweetbox: 150000
+  };
+
+  let selectedSeats = [];
+
+  
+  const soldSeats = [];
+  while (soldSeats.length < 6) {
+    let r = Math.floor(Math.random() * 40); // 5x8 = 40 ghế
+    if (!soldSeats.includes(r)) soldSeats.push(r);
+  }
+
+ 
+  function renderSeats() {
+    for (let i = 0; i < 5; i++) {
+      for (let j = 0; j < 8; j++) {
+        let index = i * 8 + j;
+        let seat = document.createElement("div");
+        seat.classList.add("seat");
+
+        if (i < 2) seat.classList.add("standard");
+        else if (i < 4) seat.classList.add("vip");
+        else seat.classList.add("sweetbox");
+
+        seat.textContent = index + 1;
+        seat.dataset.index = index;
+
+      
+        if (soldSeats.includes(index)) {
+          seat.classList.add("sold");
+        }
+
+        seat.addEventListener("click", () => selectSeat(seat));
+
+        seatArea.appendChild(seat);
+      }
+    }
+  }
+
+  renderSeats();
+
+  function selectSeat(seat) {
+    if (seat.classList.contains("sold")) return;
+
+    let index = seat.dataset.index;
+
+   
+    if (seat.classList.contains("selected")) {
+      seat.classList.remove("selected");
+      selectedSeats = selectedSeats.filter(s => s != index);
+      updateInfo();
+      return;
+    }
+
+   
+    if (selectedSeats.length >= 5) {
+      alert("Bạn chỉ được chọn tối đa 5 ghế!");
+      return;
+    }
+
+    seat.classList.add("selected");
+    selectedSeats.push(index);
+
+    updateInfo();
+  }
+
+  function updateInfo() {
+    countEl.textContent = selectedSeats.length;
+
+    let total = 0;
+    selectedSeats.forEach(i => {
+      let row = Math.floor(i / 8);
+      if (row < 2) total += seatPrices.standard;
+      else if (row < 4) total += seatPrices.vip;
+      else total += seatPrices.sweetbox;
+    });
+
+    totalEl.textContent = total.toLocaleString();
+  }
+
+ 
+  document.getElementById("payBtn").onclick = () => {
+    if (selectedSeats.length === 0) {
+      alert("Bạn chưa chọn ghế!");
+      return;
+    }
+
+    let ghe = selectedSeats.map(s => Number(s) + 1).join(", ");
+    let tong = totalEl.textContent;
+
+    document.getElementById("summary").innerHTML =
+      "Ghế đã đặt: " + ghe + "<br>Tổng tiền: " + tong + "đ";
+
+    document.getElementById("modal").style.display = "flex";
+  };
+
+  function closeModal() {
+    document.getElementById("modal").style.display = "none";
+  }
+</script>
+
+</body>
+</html>

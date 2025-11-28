@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>TODO MATRIX</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      display: flex;
+      gap: 20px;
+      padding: 20px;
+    }
+
+
+    .left-info {
+      width: 25%;
+      min-width: 220px;
+      text-align: center;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+    }
+
+    .left-info img {
+      width: 150px;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 50%;
+      margin-bottom: 15px;
+    }
+
+ 
+    .right-board {
+      width: 75%;
+    }
+
+    .task-input {
+      margin-bottom: 20px;
+    }
+
+    .task-input input,
+    .task-input select {
+      padding: 8px;
+      margin-right: 10px;
+      font-size: 16px;
+    }
+
+    .task-input button {
+      padding: 8px 15px;
+      font-size: 16px;
+    }
+
+
+    .matrix {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+    }
+
+    .box {
+      border: 1px solid #ccc;
+      padding: 15px;
+      border-radius: 8px;
+      min-height: 180px;
+    }
+
+    .task {
+      background: #f3f3f3;
+      padding: 8px;
+      margin-top: 7px;
+      border-radius: 6px;
+    }
+
+  
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+      .left-info, .right-board {
+        width: 100%;
+      }
+      .matrix {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+
+  <div class="left-info">
+    <img src="images/avatar.jpg" alt="avatar">
+    <h2>Họ tên: Lê Đình Hiếu</h2>
+    <h3>MSSV: 231A010329</h3>
+  </div>
+
+  <div class="right-board">
+
+    
+    <div class="task-input">
+      <input id="taskName" type="text" placeholder="Tên công việc">
+      <select id="priority">
+        <option value="1">Ưu tiên 1 - Quan trọng & Khẩn cấp</option>
+        <option value="2">Ưu tiên 2 - Quan trọng & Không khẩn cấp</option>
+        <option value="3">Ưu tiên 3 - Không quan trọng & Khẩn cấp</option>
+        <option value="4">Ưu tiên 4 - Không quan trọng & Không khẩn cấp</option>
+      </select>
+      <button onclick="addTask()">Thêm</button>
+    </div>
+
+   
+    <div class="matrix">
+      <div class="box" id="p1"><h3>Quan trọng & Khẩn cấp</h3></div>
+      <div class="box" id="p2"><h3>Quan trọng - Không khẩn cấp</h3></div>
+      <div class="box" id="p3"><h3>Không quan trọng - Khẩn cấp</h3></div>
+      <div class="box" id="p4"><h3>Không quan trọng - Không khẩn cấp</h3></div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+  const MSSV = "123456";     // <=== đổi MSSV
+  const lastDigit = Number(MSSV[MSSV.length - 1]);
+  const storageKey = "tasks_" + MSSV;
+
+ 
+  let tasks = JSON.parse(localStorage.getItem(storageKey)) || [];
+  window.onload = () => {
+    tasks.forEach(t => renderTask(t));
+  };
+
+ 
+  function addTask() {
+    const name = document.getElementById("taskName").value.trim();
+    const prio = document.getElementById("priority").value;
+
+    if (name === "") {
+      alert("Vui lòng nhập tên công việc!");
+      return;
+    }
+
+   
+    let color = "black";
+    if (name.length > 10) {
+      color = lastDigit % 2 === 0 ? "red" : "blue";
+    }
+
+   
+    const taskObj = {
+      name,
+      priority: prio,
+      color
+    };
+
+    tasks.push(taskObj);
+    localStorage.setItem(storageKey, JSON.stringify(tasks));
+
+    renderTask(taskObj);
+
+    document.getElementById("taskName").value = "";
+  }
+
+  
+  function renderTask(task) {
+    const div = document.createElement("div");
+    div.className = "task";
+    div.textContent = task.name;
+    div.style.color = task.color;
+
+    document.getElementById("p" + task.priority).appendChild(div);
+  }
+</script>
+
+</body>
+</html>
